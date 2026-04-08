@@ -6,35 +6,35 @@
 
 <style>
 body {
-  background: linear-gradient(145deg, #0a0a0a, #111);
-  color: white;
+  background: #f8fafc;
+  color: #1e293b;
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .container {
-  max-width: 420px;
+  width: 90%;
+  max-width: 900px;
   margin: auto;
   padding: 20px;
 }
 
-h2 {
+.header {
   text-align: center;
-  margin-bottom: 5px;
+  margin-bottom: 25px;
 }
 
-.sub {
-  text-align: center;
-  opacity: 0.6;
-  margin-bottom: 20px;
+.header img {
+  width: 180px;
+  margin-bottom: 10px;
 }
 
 .card {
-  background: rgba(255,255,255,0.03);
-  backdrop-filter: blur(10px);
+  background: white;
   padding: 18px;
   border-radius: 16px;
   margin-bottom: 15px;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
 }
 
 input, select {
@@ -43,8 +43,8 @@ input, select {
   margin-top: 10px;
   border-radius: 10px;
   border: none;
-  background: #111;
-  color: white;
+  background: #f1f5f9;
+  color: #111;
 }
 
 button {
@@ -53,21 +53,21 @@ button {
   margin-top: 12px;
   border-radius: 12px;
   border: none;
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: black;
+  background: linear-gradient(135deg, #7A96A6, #4A6572);
+  color: white;
   font-weight: bold;
 }
 
 .delete {
-  background: #ef4444;
-  margin-top: 10px;
+  background: #C9A86A;
+  color: black;
 }
 
 .total {
   text-align: center;
-  font-size: 24px;
+  font-size: 20px;
   margin-top: 20px;
-  color: #22c55e;
+  color: #4A6572;
 }
 </style>
 </head>
@@ -75,17 +75,26 @@ button {
 <body>
 
 <div class="container">
-  <h2>CLARYLUX STUDIO ✨</h2>
-  <div class="sub">Glass & Mirror Calculator</div>
 
+  <!-- 🔥 LOGO -->
+  <div class="header">
+    <img src="clarylux_logo_white.png">
+    <div style="opacity:0.6;">Glass & Mirror Calculator</div>
+  </div>
+
+  <!-- 💰 MARGEN -->
   <input type="number" id="margin" placeholder="Margin % (ej: 40)" value="40">
 
+  <!-- 📦 PIEZAS -->
   <div id="piezas"></div>
 
+  <!-- BOTONES -->
   <button onclick="agregarPieza()">+ Agregar pieza</button>
   <button onclick="calcular()">💰 Calcular</button>
 
-  <div class="total" id="total"></div>
+  <!-- 📊 RESULTADO -->
+  <div class="card" id="resumenGlobal"></div>
+
 </div>
 
 <script>
@@ -101,8 +110,8 @@ function agregarPieza() {
   div.innerHTML = `
     <h4>Pieza ${contador}</h4>
 
-    <input type="number" placeholder="Width" id="w${contador}">
-    <input type="number" placeholder="Height" id="h${contador}">
+    <input type="number" placeholder="Width (in)" id="w${contador}">
+    <input type="number" placeholder="Height (in)" id="h${contador}">
 
     <select id="glass${contador}">
       <option value="clear">Clear</option>
@@ -126,6 +135,8 @@ function agregarPieza() {
     <input type="number" placeholder="Holes ($25 c/u)" id="holes${contador}">
     <input type="number" placeholder="Extras $" id="extra${contador}">
 
+    <div id="result${contador}" style="margin-top:10px; font-size:13px; opacity:0.7;"></div>
+
     <button class="delete" onclick="eliminar(${contador})">Eliminar</button>
   `;
 
@@ -139,6 +150,7 @@ function eliminar(id) {
 
 function calcular() {
   let totalCosto = 0;
+  let totalSqft = 0;
 
   for (let i = 1; i <= contador; i++) {
     let w = Number(document.getElementById("w"+i)?.value);
@@ -146,6 +158,7 @@ function calcular() {
     if (!w || !h) continue;
 
     let sqft = (w * h) / 144;
+    totalSqft += sqft;
 
     let type = document.getElementById("glass"+i)?.value;
     let thick = Number(document.getElementById("thickness"+i)?.value);
@@ -170,6 +183,11 @@ function calcular() {
     let subtotal = material + holesCost + extra;
 
     totalCosto += subtotal;
+
+    document.getElementById("result"+i).innerHTML = `
+      ${sqft.toFixed(2)} ft² × $${base.toFixed(2)} = $${material.toFixed(2)}<br>
+      Holes: $${holesCost} | Subtotal: $${subtotal.toFixed(2)}
+    `;
   }
 
   let margin = Number(document.getElementById("margin").value) || 40;
@@ -177,10 +195,13 @@ function calcular() {
   let venta = totalCosto * (1 + margin / 100);
   let ganancia = venta - totalCosto;
 
-  document.getElementById("total").innerHTML =
-    `Costo: $${totalCosto.toFixed(2)}<br>
-     Venta: $${venta.toFixed(2)}<br>
-     Ganancia: $${ganancia.toFixed(2)}`;
+  document.getElementById("resumenGlobal").innerHTML = `
+    <h3>Resumen</h3>
+    Total Ft²: <b>${totalSqft.toFixed(2)}</b><br>
+    Costo: <b>$${totalCosto.toFixed(2)}</b><br>
+    Venta: <b>$${venta.toFixed(2)}</b><br>
+    Ganancia: <b>$${ganancia.toFixed(2)}</b>
+  `;
 }
 
 agregarPieza();
