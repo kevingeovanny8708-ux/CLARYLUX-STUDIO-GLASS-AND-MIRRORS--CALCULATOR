@@ -1,57 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
 <title>Clarylux Calculator</title>
 
 <style>
 body {
-  font-family: Arial;
   background: #111;
   color: white;
-  padding: 20px;
+  font-family: Arial;
+  display: flex;
+  justify-content: center;
 }
-.box {
-  max-width: 500px;
-  margin: auto;
+
+.container {
+  width: 350px;
+  margin-top: 40px;
 }
-.pieza {
-  background: #222;
+
+.card {
+  background: #1c1c1c;
   padding: 15px;
-  margin-bottom: 10px;
-  border-radius: 10px;
+  border-radius: 12px;
+  margin-bottom: 15px;
 }
-input, select, button {
+
+input, select {
   width: 100%;
-  padding: 12px;
-  margin: 6px 0;
+  padding: 10px;
+  margin-top: 8px;
   border-radius: 8px;
   border: none;
 }
+
 button {
-  background: #00c896;
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #22c55e;
+  color: black;
   font-weight: bold;
 }
+
 .total {
-  font-size: 22px;
   text-align: center;
-  margin-top: 20px;
-  color: #00ffcc;
+  font-size: 22px;
+  margin-top: 15px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="box">
-<h2>Clarylux Calculator 🔥</h2>
+<div class="container">
+  <h2>Clarylux Calculator 🔥</h2>
 
-<div id="contenedor"></div>
+  <div id="piezas"></div>
 
-<button onclick="agregarPieza()">➕ Agregar pieza</button>
-<button onclick="calcularTotal()">💰 Calcular Total</button>
+  <button onclick="agregarPieza()">+ Agregar pieza</button>
+  <button onclick="calcular()">💰 Calcular Total</button>
 
-<div class="total" id="totalFinal">Total: $0</div>
+  <div class="total" id="total">TOTAL: $0.00</div>
 </div>
 
 <script>
@@ -61,76 +72,91 @@ function agregarPieza() {
   contador++;
 
   let div = document.createElement("div");
-  div.className = "pieza";
+  div.className = "card";
+
   div.innerHTML = `
     <h4>Pieza ${contador}</h4>
 
-    <input type="number" placeholder="Width (inches)" id="w${contador}">
-    <input type="number" placeholder="Height (inches)" id="h${contador}">
+    <input type="number" placeholder="Width (in)" id="w${contador}">
+    <input type="number" placeholder="Height (in)" id="h${contador}">
 
-    <select id="type${contador}">
+    <select id="glass${contador}">
+      <option value="clear">Clear</option>
+      <option value="lowiron">Low Iron</option>
+      <option value="laminated">Laminado</option>
+      <option value="mirror">Mirror</option>
+    </select>
 
-      <!-- VIDRIO NORMAL -->
-      <option value="10">Clear 1/4</option>
-      <option value="14">Clear 3/8</option>
-      <option value="16">Clear 1/2</option>
+    <select id="thickness${contador}">
+      <option value="1">1/4</option>
+      <option value="1.5">3/8</option>
+      <option value="2">1/2</option>
+      <option value="2.5">5/8</option>
+    </select>
 
-      <!-- LAMINADO -->
-      <option value="12">Laminado 1/4</option>
-      <option value="18">Laminado 3/8</option>
-      <option value="25">Laminado 1/2</option>
-
-      <!-- TEMPERED -->
-      <option value="20">Tempered 1/4</option>
-      <option value="28">Tempered 3/8</option>
-      <option value="38">Tempered 1/2</option>
-
-      <!-- LOW IRON -->
-      <option value="30">Low Iron 3/8</option>
-      <option value="45">Low Iron 1/2</option>
-      <option value="52">Low Iron 5/8</option>
-
-      <!-- MIRRORS -->
-      <option value="12">Mirror 3/16</option>
-      <option value="15">Mirror 1/4</option>
-
-      <!-- SPECIAL -->
-      <option value="35">Bronze 1/2</option>
-      <option value="5">Tempering Only</option>
-
+    <select id="temper${contador}">
+      <option value="no">No Tempered</option>
+      <option value="yes">Tempered</option>
     </select>
 
     <input type="number" placeholder="Holes ($25 c/u)" id="holes${contador}">
     <input type="number" placeholder="Extras $" id="extra${contador}">
   `;
 
-  document.getElementById("contenedor").appendChild(div);
+  document.getElementById("piezas").appendChild(div);
 }
 
-function calcularTotal() {
+function calcular() {
   let total = 0;
 
   for (let i = 1; i <= contador; i++) {
     let w = Number(document.getElementById("w"+i)?.value);
     let h = Number(document.getElementById("h"+i)?.value);
-    let price = Number(document.getElementById("type"+i)?.value);
+
+    if (!w || !h) continue;
+
+    let sqft = (w * h) / 144;
+
+    let type = document.getElementById("glass"+i)?.value;
+    let thick = Number(document.getElementById("thickness"+i)?.value);
+    let temper = document.getElementById("temper"+i)?.value;
+
     let holes = Number(document.getElementById("holes"+i)?.value) || 0;
     let extra = Number(document.getElementById("extra"+i)?.value) || 0;
 
-    if (w > 0 && h > 0) {
-      let sqft = (w * h) / 144;
-      let subtotal = (sqft * price) + (holes * 25) + extra;
+    let basePrice = 0;
 
-      total += subtotal;
+    // PRECIOS BASE (puedes ajustar luego)
+    if (type === "clear") basePrice = 8;
+    if (type === "lowiron") basePrice = 12;
+    if (type === "laminated") basePrice = 15;
+    if (type === "mirror") basePrice = 12;
+
+    // espesor
+    basePrice = basePrice * thick;
+
+    // temperado
+    if (temper === "yes") {
+      basePrice += 12;
     }
+
+    let material = sqft * basePrice;
+    let holesCost = holes * 25;
+
+    let subtotal = material + holesCost + extra;
+
+    total += subtotal;
   }
 
   // margen 40%
   total = total * 1.4;
 
-  document.getElementById("totalFinal").innerText =
+  document.getElementById("total").innerText =
     "TOTAL: $" + total.toFixed(2);
 }
+
+// inicia con una pieza
+agregarPieza();
 </script>
 
 </body>
