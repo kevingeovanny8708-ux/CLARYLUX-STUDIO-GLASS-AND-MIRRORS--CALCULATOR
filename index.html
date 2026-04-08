@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clarylux Calculator</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #111;
+  color: white;
+  padding: 20px;
+}
+.box {
+  max-width: 500px;
+  margin: auto;
+}
+.pieza {
+  background: #222;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+}
+input, select, button {
+  width: 100%;
+  padding: 12px;
+  margin: 6px 0;
+  border-radius: 8px;
+  border: none;
+}
+button {
+  background: #00c896;
+  font-weight: bold;
+}
+.total {
+  font-size: 22px;
+  text-align: center;
+  margin-top: 20px;
+  color: #00ffcc;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<h2>Clarylux Calculator 🔥</h2>
+
+<div id="contenedor"></div>
+
+<button onclick="agregarPieza()">➕ Agregar pieza</button>
+<button onclick="calcularTotal()">💰 Calcular Total</button>
+
+<div class="total" id="totalFinal">Total: $0</div>
+</div>
+
+<script>
+let contador = 0;
+
+function agregarPieza() {
+  contador++;
+
+  let div = document.createElement("div");
+  div.className = "pieza";
+  div.innerHTML = `
+    <h4>Pieza ${contador}</h4>
+
+    <input type="number" placeholder="Width (inches)" id="w${contador}">
+    <input type="number" placeholder="Height (inches)" id="h${contador}">
+
+    <select id="type${contador}">
+
+      <!-- VIDRIO NORMAL -->
+      <option value="10">Clear 1/4</option>
+      <option value="14">Clear 3/8</option>
+      <option value="16">Clear 1/2</option>
+
+      <!-- LAMINADO -->
+      <option value="12">Laminado 1/4</option>
+      <option value="18">Laminado 3/8</option>
+      <option value="25">Laminado 1/2</option>
+
+      <!-- TEMPERED -->
+      <option value="20">Tempered 1/4</option>
+      <option value="28">Tempered 3/8</option>
+      <option value="38">Tempered 1/2</option>
+
+      <!-- LOW IRON -->
+      <option value="30">Low Iron 3/8</option>
+      <option value="45">Low Iron 1/2</option>
+      <option value="52">Low Iron 5/8</option>
+
+      <!-- MIRRORS -->
+      <option value="12">Mirror 3/16</option>
+      <option value="15">Mirror 1/4</option>
+
+      <!-- SPECIAL -->
+      <option value="35">Bronze 1/2</option>
+      <option value="5">Tempering Only</option>
+
+    </select>
+
+    <input type="number" placeholder="Holes ($25 c/u)" id="holes${contador}">
+    <input type="number" placeholder="Extras $" id="extra${contador}">
+  `;
+
+  document.getElementById("contenedor").appendChild(div);
+}
+
+function calcularTotal() {
+  let total = 0;
+
+  for (let i = 1; i <= contador; i++) {
+    let w = Number(document.getElementById("w"+i)?.value);
+    let h = Number(document.getElementById("h"+i)?.value);
+    let price = Number(document.getElementById("type"+i)?.value);
+    let holes = Number(document.getElementById("holes"+i)?.value) || 0;
+    let extra = Number(document.getElementById("extra"+i)?.value) || 0;
+
+    if (w > 0 && h > 0) {
+      let sqft = (w * h) / 144;
+      let subtotal = (sqft * price) + (holes * 25) + extra;
+
+      total += subtotal;
+    }
+  }
+
+  // margen 40%
+  total = total * 1.4;
+
+  document.getElementById("totalFinal").innerText =
+    "TOTAL: $" + total.toFixed(2);
+}
+</script>
+
+</body>
+</html>
