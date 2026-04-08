@@ -1,53 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Clarylux Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clarylux Studio</title>
 
 <style>
 body {
-  background: #111;
+  background: linear-gradient(145deg, #0a0a0a, #111);
   color: white;
-  font-family: Arial;
-  display: flex;
-  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .container {
-  width: 350px;
-  margin-top: 40px;
+  max-width: 420px;
+  margin: auto;
+  padding: 20px;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.sub {
+  text-align: center;
+  opacity: 0.6;
+  margin-bottom: 20px;
 }
 
 .card {
-  background: #1c1c1c;
-  padding: 15px;
-  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(10px);
+  padding: 18px;
+  border-radius: 16px;
   margin-bottom: 15px;
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
 input, select {
   width: 100%;
-  padding: 10px;
-  margin-top: 8px;
-  border-radius: 8px;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 10px;
   border: none;
+  background: #111;
+  color: white;
 }
 
 button {
   width: 100%;
-  padding: 12px;
-  margin-top: 10px;
+  padding: 14px;
+  margin-top: 12px;
+  border-radius: 12px;
   border: none;
-  border-radius: 10px;
-  background: #22c55e;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
   color: black;
   font-weight: bold;
 }
 
+.delete {
+  background: #ef4444;
+  margin-top: 10px;
+}
+
 .total {
   text-align: center;
-  font-size: 22px;
-  margin-top: 15px;
+  font-size: 24px;
+  margin-top: 20px;
+  color: #22c55e;
 }
 </style>
 </head>
@@ -55,14 +75,17 @@ button {
 <body>
 
 <div class="container">
-  <h2>Clarylux Calculator 🔥</h2>
+  <h2>CLARYLUX STUDIO ✨</h2>
+  <div class="sub">Glass & Mirror Calculator</div>
+
+  <input type="number" id="margin" placeholder="Margin % (ej: 40)" value="40">
 
   <div id="piezas"></div>
 
   <button onclick="agregarPieza()">+ Agregar pieza</button>
-  <button onclick="calcular()">💰 Calcular Total</button>
+  <button onclick="calcular()">💰 Calcular</button>
 
-  <div class="total" id="total">TOTAL: $0.00</div>
+  <div class="total" id="total"></div>
 </div>
 
 <script>
@@ -73,12 +96,13 @@ function agregarPieza() {
 
   let div = document.createElement("div");
   div.className = "card";
+  div.id = "pieza"+contador;
 
   div.innerHTML = `
     <h4>Pieza ${contador}</h4>
 
-    <input type="number" placeholder="Width (in)" id="w${contador}">
-    <input type="number" placeholder="Height (in)" id="h${contador}">
+    <input type="number" placeholder="Width" id="w${contador}">
+    <input type="number" placeholder="Height" id="h${contador}">
 
     <select id="glass${contador}">
       <option value="clear">Clear</option>
@@ -101,18 +125,24 @@ function agregarPieza() {
 
     <input type="number" placeholder="Holes ($25 c/u)" id="holes${contador}">
     <input type="number" placeholder="Extras $" id="extra${contador}">
+
+    <button class="delete" onclick="eliminar(${contador})">Eliminar</button>
   `;
 
   document.getElementById("piezas").appendChild(div);
 }
 
+function eliminar(id) {
+  let pieza = document.getElementById("pieza"+id);
+  if (pieza) pieza.remove();
+}
+
 function calcular() {
-  let total = 0;
+  let totalCosto = 0;
 
   for (let i = 1; i <= contador; i++) {
     let w = Number(document.getElementById("w"+i)?.value);
     let h = Number(document.getElementById("h"+i)?.value);
-
     if (!w || !h) continue;
 
     let sqft = (w * h) / 144;
@@ -124,38 +154,35 @@ function calcular() {
     let holes = Number(document.getElementById("holes"+i)?.value) || 0;
     let extra = Number(document.getElementById("extra"+i)?.value) || 0;
 
-    let basePrice = 0;
+    let base = 0;
 
-    // PRECIOS BASE (puedes ajustar luego)
-    if (type === "clear") basePrice = 8;
-    if (type === "lowiron") basePrice = 12;
-    if (type === "laminated") basePrice = 15;
-    if (type === "mirror") basePrice = 12;
+    if (type === "clear") base = 8;
+    if (type === "lowiron") base = 12;
+    if (type === "laminated") base = 15;
+    if (type === "mirror") base = 12;
 
-    // espesor
-    basePrice = basePrice * thick;
+    base = base * thick;
 
-    // temperado
-    if (temper === "yes") {
-      basePrice += 12;
-    }
+    if (temper === "yes") base += 12;
 
-    let material = sqft * basePrice;
+    let material = sqft * base;
     let holesCost = holes * 25;
-
     let subtotal = material + holesCost + extra;
 
-    total += subtotal;
+    totalCosto += subtotal;
   }
 
-  // margen 40%
-  total = total * 1.4;
+  let margin = Number(document.getElementById("margin").value) || 40;
 
-  document.getElementById("total").innerText =
-    "TOTAL: $" + total.toFixed(2);
+  let venta = totalCosto * (1 + margin / 100);
+  let ganancia = venta - totalCosto;
+
+  document.getElementById("total").innerHTML =
+    `Costo: $${totalCosto.toFixed(2)}<br>
+     Venta: $${venta.toFixed(2)}<br>
+     Ganancia: $${ganancia.toFixed(2)}`;
 }
 
-// inicia con una pieza
 agregarPieza();
 </script>
 
